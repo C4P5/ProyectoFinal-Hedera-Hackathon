@@ -208,6 +208,10 @@ const GuardianAPI = (() => {
    * Submit a waste delivery document to the Guardian policy.
    */
   async function submitDelivery(doc) {
+    const auth = _loadAuth();
+    if (auth.offline) {
+      throw new Error('Cannot submit: logged in offline mode. Ensure the CORS proxy is deployed and GUARDIAN_URL is set in config.js');
+    }
     return post(`/policies/${CONFIG.POLICY_ID}/blocks/${CONFIG.BLOCKS.PP_DELIVERY_FORM}`, {
       document: doc,
       ref: null,

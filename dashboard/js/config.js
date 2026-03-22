@@ -1,5 +1,5 @@
 // EGGOLOGIC Dashboard Config
-// I ALMOST LOST MY WITS WITH THIS ONE - GOD BLESS CLOUDFLARE.
+// Zero-middleware: browser → Cloudflare CORS proxy → Guardian API + Mirror Node
 const CONFIG = {
   // Guardian API via CORS proxy (Cloudflare Worker)
   GUARDIAN_URL: 'https://eggologic-proxy.sargas.workers.dev/api/v1',

@@ -65,12 +65,88 @@ const UI = (() => {
     document.body.appendChild(modal);
   }
 
+  function initRegistrationModal() {
+    const modal = document.createElement('div');
+    modal.id = 'registration-modal';
+    modal.className = 'fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm hidden';
+    modal.innerHTML = `
+      <div class="bg-white rounded-3xl p-8 md:p-10 w-full max-w-xl shadow-2xl relative max-h-[90vh] overflow-y-auto">
+        <button onclick="UI.closeRegistration()" class="absolute top-4 right-4 text-stone-400 hover:text-stone-700">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-10 h-10 bg-[#FBD54E] rounded-full flex items-center justify-center">
+            <span class="material-symbols-outlined text-[#10381E]">storefront</span>
+          </div>
+          <h2 class="text-2xl font-bold text-[#10381E]">Quiero Ser Parte</h2>
+        </div>
+        <p class="text-sm text-stone-500 mb-8 border-b border-stone-100 pb-4">Únete a EGGOLOGIC. Completa este formulario para registrar tu restaurante y sumarte a la economía circular real.</p>
+        
+        <form id="registration-form" onsubmit="event.preventDefault(); window.submitRegistration();" class="space-y-5">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label class="text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-2 block">Nombre del Restaurante *</label>
+              <input id="reg-restaurant-name" type="text" required class="w-full px-4 py-3 rounded-2xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#10381E]/20 bg-stone-50" />
+            </div>
+            <div>
+              <label class="text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-2 block">Nombre de Contacto *</label>
+              <input id="reg-contact-name" type="text" required class="w-full px-4 py-3 rounded-2xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#10381E]/20 bg-stone-50" />
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label class="text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-2 block">Correo Electrónico *</label>
+              <input id="reg-email" type="email" required class="w-full px-4 py-3 rounded-2xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#10381E]/20 bg-stone-50" />
+            </div>
+            <div>
+              <label class="text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-2 block">Número de Teléfono *</label>
+              <input id="reg-phone" type="tel" required class="w-full px-4 py-3 rounded-2xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#10381E]/20 bg-stone-50" placeholder="+598..." />
+            </div>
+          </div>
+
+          <div>
+            <label class="text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-2 block">Dirección Físico *</label>
+            <input id="reg-address" type="text" required class="w-full px-4 py-3 rounded-2xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#10381E]/20 bg-stone-50" />
+          </div>
+          
+          <div>
+            <label class="text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-2 block">Desperdicio Orgánico Semanal Estimado (kg) *</label>
+            <input id="reg-waste" type="number" min="0" required placeholder="ej. 50" class="w-full px-4 py-3 rounded-2xl border border-stone-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#10381E]/20 bg-stone-50" />
+          </div>
+
+          <div class="flex items-start gap-3 mt-6 pt-4 border-t border-stone-100">
+            <input type="checkbox" id="reg-terms" required class="mt-1 w-4 h-4 text-[#10381E] bg-gray-100 border-gray-300 rounded focus:ring-[#10381E]" />
+            <label for="reg-terms" class="text-xs text-stone-500 leading-snug">
+              Acepto los términos y condiciones de la plataforma y consiento el tratamiento de mis datos personales en cumplimiento estricto con la <a href="https://www.impo.com.uy/bases/leyes/18331-2008" target="_blank" class="font-bold text-[#10381E] hover:underline">Ley No. 18.331 de Protección de Datos Personales</a> de la República Oriental del Uruguay y su decreto reglamentario.
+            </label>
+          </div>
+          
+          <button type="submit" id="reg-submit-btn" class="w-full py-4 mt-6 bg-[#10381E] text-white rounded-full font-bold text-sm hover:opacity-90 transition-opacity flex justify-center items-center gap-2 shadow-lg">
+            <span>Enviar Solicitud</span>
+            <span class="material-symbols-outlined text-sm">send</span>
+          </button>
+        </form>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+
   function openLogin() {
     document.getElementById('login-modal').classList.remove('hidden');
   }
 
   function closeLogin() {
     document.getElementById('login-modal').classList.add('hidden');
+  }
+
+  function openRegistration() {
+    document.getElementById('registration-modal').classList.remove('hidden');
+  }
+
+  function closeRegistration() {
+    document.getElementById('registration-modal').classList.add('hidden');
+    document.getElementById('registration-form').reset();
   }
 
   async function doLogin() {
@@ -266,6 +342,7 @@ const UI = (() => {
    */
   function init() {
     initLoginModal();
+    initRegistrationModal();
     initMobileMenu();
     updateAuthUI();
   }
@@ -311,7 +388,7 @@ const UI = (() => {
     });
   }
 
-  return { init, initLoginModal, openLogin, closeLogin, doLogin, updateAuthUI, setText, setHTML, showLoading, showSkeletonRows, showToast, fmt, timeAgo };
+  return { init, initLoginModal, openLogin, closeLogin, openRegistration, closeRegistration, doLogin, updateAuthUI, setText, setHTML, showLoading, showSkeletonRows, showToast, fmt, timeAgo };
 })();
 
 // Auto-init on DOM ready

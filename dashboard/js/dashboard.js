@@ -233,9 +233,12 @@ function updateDeliveryCard() {
     form.classList.remove('hidden');
     // Set delivery ID chip from mint events (more reliable than cache. Like, REALLY)
     _updateDeliveryId();
+    document.getElementById('admin-section')?.classList.remove('hidden');
+    if (typeof loadAdminApplications === 'function') loadAdminApplications();
   } else {
     cta.classList.remove('hidden');
     form.classList.add('hidden');
+    document.getElementById('admin-section')?.classList.add('hidden');
   }
 }
 
@@ -497,3 +500,113 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (GuardianAPI.isLoggedIn()) loadUserData();
 });
+
+// ── Supplier Onboarding Logic ──
+
+window.submitRegistration = function() {
+  const btn = document.getElementById('reg-submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-sm">progress_activity</span> <span>Enviando...</span>';
+
+  setTimeout(() => {
+    const app = {
+      id: 'APP-' + Date.now().toString().slice(-6),
+      restaurantName: document.getElementById('reg-restaurant-name').value,
+      contactName: document.getElementById('reg-contact-name').value,
+      email: document.getElementById('reg-email').value,
+      phone: document.getElementById('reg-phone').value,
+      address: document.getElementById('reg-address').value,
+      waste: document.getElementById('reg-waste').value,
+      date: new Date().toISOString(),
+      status: 'Waiting for approval'
+    };
+
+    const apps = JSON.parse(localStorage.getItem('eggologic_applications') || '[]');
+    apps.unshift(app);
+    localStorage.setItem('eggologic_applications', JSON.stringify(apps));
+
+    UI.closeRegistration();
+    UI.showToast('Solicitud enviada. Nos pondremos en contacto.');
+    
+    btn.disabled = false;
+    btn.innerHTML = '<span>Enviar Solicitud</span><span class="material-symbols-outlined text-sm">send</span>';
+    
+    // Refresh admin list if PP is currently logged in
+    if (GuardianAPI.isLoggedIn() && GuardianAPI.currentUser().role === 'Project_Proponent') {
+      loadAdminApplications();
+    }
+  }, 800);
+}
+
+window.loadAdminApplications = function() {
+  const container = document.getElementById('admin-applications-list');
+  if (!container) return;
+  const apps = JSON.parse(localStorage.getItem('eggologic_applications') || '[]');
+
+  if (apps.length === 0) {
+    container.innerHTML = '<p class="text-stone-400 text-sm text-center py-12">No pending applications</p>';
+    return;
+  }
+
+  container.innerHTML = apps.map(app => {
+    const isWaiting = app.status === 'Waiting for approval';
+    const isApproved = app.status === 'Approved by Project Proponent';
+    
+    let statusHtml = '';
+    let actionHtml = '';
+
+    if (isWaiting) {
+      statusHtml = '<span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest leading-none flex items-center">Waiting Approval</span>';
+      actionHtml = `<button onclick="updateAppStatus('${app.id}', 'Approved by Project Proponent')" class="text-xs bg-primary text-white px-4 py-2 rounded-lg font-bold hover:opacity-90 transition-opacity whitespace-nowrap">Approve (Manual)</button>`;
+    } else if (isApproved) {
+      statusHtml = '<span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest leading-none flex items-center">Approved (Pending Guardian)</span>';
+      actionHtml = `<button onclick="updateAppStatus('${app.id}', 'Ingested in Guardian')" class="text-xs bg-[#C1EDC7] text-[#10381E] px-4 py-2 rounded-lg font-bold hover:bg-[#A3CFA1] transition-opacity whitespace-nowrap border border-[#A3CFA1]">Mark as Ingested</button>`;
+    } else {
+      statusHtml = '<span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest leading-none flex items-center">Ingested in Guardian</span>';
+    }
+
+    const copyData = `Name: ${app.restaurantName}\\nContact: ${app.contactName}\\nEmail: ${app.email}\\nPhone: ${app.phone}\\nAddress: ${app.address}\\nWaste: ${app.waste} kg`;
+
+    return `
+      <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6 hover:border-primary/20 transition-colors">
+        <div class="space-y-2 w-full md:w-auto">
+          <div class="flex flex-wrap items-center gap-3">
+            <h4 class="font-bold text-lg text-primary">${app.restaurantName}</h4>
+            ${statusHtml}
+          </div>
+          <p class="text-sm text-on-surface-variant flex flex-wrap gap-x-2 gap-y-1">
+            <span class="font-mono text-xs text-stone-400">${app.id}</span>
+            <span class="text-stone-300">•</span>
+            <span>${app.contactName}</span>
+            <span class="text-stone-300">•</span>
+            <a href="mailto:${app.email}" class="text-secondary hover:underline">${app.email}</a>
+            <span class="text-stone-300">•</span>
+            <span>${app.phone}</span>
+          </p>
+          <p class="text-sm text-on-surface-variant">
+            <strong>Address:</strong> ${app.address} <span class="text-stone-300 mx-2">•</span> <strong>Est. Waste:</strong> ${app.waste} kg/week
+          </p>
+          <button onclick="navigator.clipboard.writeText(\`${copyData}\`); UI.showToast('Data copied to clipboard')" class="text-xs text-secondary font-bold hover:text-primary mt-2 inline-flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">content_copy</span>
+            Copy data for Guardian ingestion
+          </button>
+        </div>
+        <div class="shrink-0 flex gap-2 w-full md:w-auto justify-end">
+          ${actionHtml}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+window.updateAppStatus = function(id, newStatus) {
+  let apps = JSON.parse(localStorage.getItem('eggologic_applications') || '[]');
+  const app = apps.find(a => a.id === id);
+  if (app) {
+    app.status = newStatus;
+    localStorage.setItem('eggologic_applications', JSON.stringify(apps));
+    loadAdminApplications();
+    UI.showToast(`Application ${id} updated to: ${newStatus}`);
+  }
+}
+

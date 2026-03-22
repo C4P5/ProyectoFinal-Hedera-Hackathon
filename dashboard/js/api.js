@@ -122,10 +122,19 @@ const GuardianAPI = (() => {
    * falls back to live Guardian API.
    */
   async function getBlockData(blockId) {
-    // Try local cache first (avoids CORS issues)
+    // Prefer live API when logged in (cache may be stale)
+    // pageSize=50 overrides Guardian's default of 10
+    if (isLoggedIn() && !_loadAuth().offline) {
+      try {
+        return await get(`/policies/${CONFIG.POLICY_ID}/blocks/${blockId}?pageSize=50`);
+      } catch (e) {
+        console.warn('[Guardian] Live API failed, trying cache:', e.message);
+      }
+    }
+    // Fallback to local cache (pre-fetched data, avoids CORS issues)
     const cached = await _tryCache(blockId);
     if (cached) return cached;
-    return get(`/policies/${CONFIG.POLICY_ID}/blocks/${blockId}`);
+    return get(`/policies/${CONFIG.POLICY_ID}/blocks/${blockId}?pageSize=50`);
   }
 
   /**

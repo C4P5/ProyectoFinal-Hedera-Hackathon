@@ -158,6 +158,19 @@
   animation: fadeInUp 0.5s ease-out forwards;
 }
 
+/* Right-scrolling carousel */
+@keyframes scrollRight {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.carousel-scroll {
+  animation: scrollRight 18s linear infinite;
+  width: max-content;
+}
+.carousel-scroll:hover {
+  animation-play-state: paused;
+}
+
 /* Chart bar grow-up entrance */
 @keyframes growUp {
   from { transform: scaleY(0); }

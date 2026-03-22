@@ -133,8 +133,22 @@
         <h3 class="font-headline text-2xl text-primary mb-2">Organic Waste Processed</h3>
         <p class="text-on-surface-variant text-sm">Delivery data from verified Guardian policy.</p>
       </div>
-      <div class="bg-surface-container-low px-4 py-2 rounded-full text-xs font-bold text-primary flex items-center gap-2 cursor-pointer border border-stone-100">
-        All Deliveries <span class="material-symbols-outlined text-sm">expand_more</span>
+      <div class="relative">
+        <div id="chart-filter-btn" onclick="toggleFilterDropdown()" class="bg-surface-container-low px-4 py-2 rounded-full text-xs font-bold text-primary flex items-center gap-2 cursor-pointer border border-stone-100 hover:border-primary/20 transition-all select-none">
+          All Deliveries <span class="material-symbols-outlined text-sm">expand_more</span>
+        </div>
+        <div id="chart-filter-dropdown" class="hidden absolute right-0 top-full mt-2 bg-white rounded-2xl shadow-xl border border-stone-100 py-2 z-20 min-w-[180px]">
+          <button onclick="filterChart('all')" class="w-full text-left px-4 py-2.5 text-xs font-bold text-primary hover:bg-stone-50 transition-colors">All Deliveries</button>
+          <button onclick="filterChart('A')" class="w-full text-left px-4 py-2.5 text-xs font-bold text-primary hover:bg-stone-50 transition-colors flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-[#10381E]"></span> Cat. A — Clean
+          </button>
+          <button onclick="filterChart('B')" class="w-full text-left px-4 py-2.5 text-xs font-bold text-primary hover:bg-stone-50 transition-colors flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-[#FBD54E]"></span> Cat. B — Fair
+          </button>
+          <button onclick="filterChart('C')" class="w-full text-left px-4 py-2.5 text-xs font-bold text-primary hover:bg-stone-50 transition-colors flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-red-400"></span> Cat. C — Rejected
+          </button>
+        </div>
       </div>
     </div>
     <div id="waste-chart" class="h-64 flex items-end justify-between gap-3 relative pt-8">

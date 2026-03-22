@@ -9,7 +9,7 @@
  * @param {number} decimals - Decimal places (0 for integers, 1 for '1.8t')
  * @param {number} duration - Animation duration in ms (default 1400)
  */
-function countUp(elementId, target, suffix = '', decimals = 0, duration = 1300) {
+function countUp(elementId, target, suffix = '', decimals = 0, duration = 1100) {
   const el = document.getElementById(elementId);
   if (!el) return;
   if (target === 0) { el.textContent = '0' + suffix; el.classList.add('fade-in'); return; }
@@ -225,17 +225,30 @@ function updateDeliveryCard() {
   const form = document.getElementById('delivery-form');
   if (!cta || !form) return;
 
-  if (GuardianAPI.isLoggedIn()) {
+  const user = GuardianAPI.isLoggedIn() ? GuardianAPI.currentUser() : null;
+  const isPP = user && user.role === 'Project_Proponent';
+
+  if (isPP) {
     cta.classList.add('hidden');
     form.classList.remove('hidden');
-    // Set delivery ID chip
-    const count = (window._deliveryCount || 0) + 1;
-    const chip = document.getElementById('delivery-id-chip');
-    if (chip) chip.textContent = `ENT-${String(count).padStart(3, '0')}`;
+    // Set delivery ID chip from mint events (more reliable than cache)
+    _updateDeliveryId();
   } else {
     cta.classList.remove('hidden');
     form.classList.add('hidden');
   }
+}
+
+async function _updateDeliveryId() {
+  try {
+    const mintEvents = await HederaMirror.getMintEvents();
+    window._deliveryCount = mintEvents.length;
+  } catch {
+    // Fallback: keep whatever was set by loadGlobalMetrics
+  }
+  const count = (window._deliveryCount || 0) + 1;
+  const chip = document.getElementById('delivery-id-chip');
+  if (chip) chip.textContent = `ENT-${String(count).padStart(3, '0')}`;
 }
 
 /**

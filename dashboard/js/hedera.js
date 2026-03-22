@@ -42,33 +42,43 @@ const HederaMirror = (() => {
   }
 
   /**
-   * Get recent token transfers for an account.
-   * Returns array of { amount, from, to, timestamp, txId }.
+   * Get EGGOCOIN transfers for an account.
+   * Follows pagination to collect all EGGOCOIN txs (not just the first page).
+   * Finds the transfer entry matching the queried account so amount sign is correct.
    */
-  async function getTransactions(accountId, limit = 25) {
-    const data = await _get(
-      `/api/v1/transactions?account.id=${accountId}&transactiontype=CRYPTOTRANSFER&limit=${limit}&order=desc`
-    );
-    if (!data.transactions) return [];
+  async function getTransactions(accountId, targetCount = 50) {
+    let allTxs = [];
+    let nextPath = `/api/v1/transactions?account.id=${accountId}&transactiontype=CRYPTOTRANSFER&limit=100&order=desc`;
 
-    return data.transactions.map(tx => {
-      // Find the EGGOCOIN transfer in this transaction
-      const eggTransfer = (tx.token_transfers || []).find(
-        t => t.token_id === CONFIG.EGGOCOIN_TOKEN
-      );
-      return {
-        txId: tx.transaction_id,
-        timestamp: tx.consensus_timestamp,
-        date: new Date(parseFloat(tx.consensus_timestamp) * 1000),
-        memo: atob(tx.memo_base64 || ''),
-        eggocoin: eggTransfer ? {
-          account: eggTransfer.account,
-          amount: eggTransfer.amount,
-        } : null,
-        // Include all token transfers for detailed view
-        tokenTransfers: tx.token_transfers || [],
-      };
-    }).filter(tx => tx.eggocoin); // Only return txs that involve EGGOCOIN
+    while (nextPath && allTxs.length < targetCount) {
+      const data = await _get(nextPath);
+      if (!data.transactions) break;
+
+      data.transactions.forEach(tx => {
+        // Find the EGGOCOIN transfer for THIS account (correct sign: + received, - sent)
+        const eggTransfer = (tx.token_transfers || []).find(
+          t => t.token_id === CONFIG.EGGOCOIN_TOKEN && t.account === accountId
+        );
+        if (eggTransfer) {
+          allTxs.push({
+            txId: tx.transaction_id,
+            timestamp: tx.consensus_timestamp,
+            date: new Date(parseFloat(tx.consensus_timestamp) * 1000),
+            memo: atob(tx.memo_base64 || ''),
+            eggocoin: {
+              account: eggTransfer.account,
+              amount: eggTransfer.amount,
+            },
+            tokenTransfers: tx.token_transfers || [],
+          });
+        }
+      });
+
+      // Follow pagination if we need more results
+      nextPath = (allTxs.length < targetCount && data.links?.next) ? data.links.next : null;
+    }
+
+    return allTxs.slice(0, targetCount);
   }
 
   /**
@@ -122,9 +132,10 @@ const HederaMirror = (() => {
     const info = await getTokenInfo(CONFIG.EGGOCOIN_TOKEN);
     const treasuryId = info.treasury_account_id;
     const data = await _get(
-      `/api/v1/transactions?account.id=${treasuryId}&transactiontype=TOKENMINT&limit=50&order=desc`
+      `/api/v1/transactions?account.id=${treasuryId}&transactiontype=TOKENMINT&limit=100&order=desc`
     );
-    return data.transactions || [];
+    // Filter to only EGGOCOIN mints (treasury may mint other tokens from other policies)
+    return (data.transactions || []).filter(tx => tx.entity_id === CONFIG.EGGOCOIN_TOKEN);
   }
 
   return {

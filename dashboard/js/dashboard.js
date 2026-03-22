@@ -399,7 +399,7 @@ async function submitDeliveryForm() {
         <div class="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
           <span class="material-symbols-outlined text-white text-[14px] animate-spin">progress_activity</span>
         </div>
-        <span class="text-xs font-bold text-primary">Submitting ${deliveryId} to Guardian...</span>
+        <span class="text-xs font-bold text-primary">Submitting ${deliveryId} for ${supplierId} to Guardian...</span>
       </div>
       <div id="ws-2" class="flex items-center gap-3 opacity-30">
         <div class="w-6 h-6 rounded-full bg-stone-200 flex items-center justify-center">
@@ -418,6 +418,8 @@ async function submitDeliveryForm() {
   btn.textContent = 'Workflow in progress...';
 
   try {
+    console.log(`[Guardian Submit] Sending delivery ${deliveryId} for supplier ${supplierId}`);
+    
     // Step 1: PP submits delivery
     await GuardianAPI.submitDelivery({
       field0: 'EWD-RB', field1: '0.3', field2: 'v0.3', field3: 'v0.3',

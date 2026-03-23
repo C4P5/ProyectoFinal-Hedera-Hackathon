@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/eggologic-banner.png" alt="Eggologic" width="600"/>
+![Header](docs/WhatsApp Image 2026-03-20 at 7.13.50 AM.jpeg)
 </p>
 
 <h1 align="center">Eggologic — Circular Economy Verified on Hedera</h1>
@@ -78,7 +78,8 @@ This is **NOT a simulation**. Once the project deploys in mainnet, every data po
 ## System Overview
 
 ```
-<img width="872" height="854" alt="chartflow" src="https://github.com/user-attachments/assets/6a14cd8e-f241-4f8f-a96d-72668ddfb1ff" />
+![Architecture](docs/chartflow.png)
+
 
 ```
 ---
@@ -548,8 +549,8 @@ All token mints and VC submissions are verifiable on Hedera testnet:
 - **[Hedera Guardian (MGS)](https://guardian.io)** — Managed Guardian Service for MRV policy engine
 - **[Hedera Mirror Node](https://docs.hedera.com/hedera/sdks-and-apis/rest-api)** — Public API for balances, transactions, NFTs
 - **[CDM AMS-III.F](https://cdm.unfccc.int/methodologies/DB/GNFWB3Y818MFBDH1SVXBLI8TQGGPK2)** — UN composting methodology (inspiration)
-- **[Tailwind CSS(https://tailwindcss.com)]** — Dashboard styling (CDN, no build)
-- **[Vanilla JavaScript(https://es.wikipedia.org/wiki/JavaScript)]** — Zero dependencies, zero framework
+- **[Tailwind CSS](https://tailwindcss.com)** — Dashboard styling (CDN, no build)
+- **[Vanilla JavaScript](https://es.wikipedia.org/wiki/JavaScript)** — Zero dependencies, zero framework
 - **Love 💚** 
 
 ---

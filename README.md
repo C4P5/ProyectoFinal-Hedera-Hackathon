@@ -1,5 +1,5 @@
 <p align="center">
-![Header](docs/WhatsApp Image 2026-03-20 at 7.13.50 AM.jpeg)
+  ![Header](docs/WhatsApp Image 2026-03-20 at 7.13.50 AM.jpeg)
 </p>
 
 <h1 align="center">Eggologic — Circular Economy Verified on Hedera</h1>
